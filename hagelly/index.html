@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Horizontal gallery</title>
+    <script type="text/javascript" src="./js/jquery-1.8.0.min.js"></script>
+    <script type="text/javascript">
+        function alignRowImages(gElements, containerWidth, imagesWidth, margin) {
+            var alpha = 1.0 * (containerWidth - margin) / imagesWidth;
+            console.log(containerWidth, imagesWidth, margin, imagesWidth * alpha + margin)
+            gElements.forEach(function (el) {
+                el.$imgContainer.width(Math.floor(el.$imgContainer.width() * alpha));
+                el.$img.css("margin-left", "-=" + Math.floor(el.$imgContainer.width() * (1 - alpha) / 2));
+            })
+        }
+
+        function createNewImagesRow($gContainer) {
+            var $row = $("<div class='images-row'></div>").appendTo($gContainer);
+            return $row.css("width", $gContainer.width() + "px");
+        }
+
+        function createGallery(images) {
+            var     rowHeight = 200,
+                    $gContainer = $("#gallery-container").empty(),
+                    containerMargin = 5,
+                    contentWidth = 0,
+                    gElements = [],
+                    $row = createNewImagesRow($gContainer),
+                    rowWidth = $row.width();
+
+            images.forEach(function (image) {
+                $('<img src="' + image.uri + '" alt="" height="' + rowHeight + 'px">').load(function () {
+                    var $img = $(this);
+                    var $imgContainer = $("<div class='image-container'></div>");
+                    $row.append($imgContainer.append($img));
+                    var imgWidth = $img.width()
+                    gElements.push({$row: $row, $imgContainer: $imgContainer, $img: $img, imgWidth: imgWidth});
+                    contentWidth += imgWidth + containerMargin;
+                    if (contentWidth > rowWidth) {
+                        var margin = containerMargin * gElements.length
+                        alignRowImages(gElements, $row.width(), contentWidth - margin, margin);
+                        $row = createNewImagesRow($gContainer);
+                        rowWidth = $row.width()
+                        contentWidth = 0;
+                        gElements = [];
+                    }
+                })
+            });
+            return $gContainer;
+        }
+
+        $(function(){
+            var images = [];
+            var imagesCount = 29;
+            for (var i = 1; i <= imagesCount; i++) {
+                images.push({uri: "./img/" + i + ".jpg"});
+            }
+            createGallery(images);
+            $(window).resize(function() {
+                createGallery(images);
+            })
+        })
+    </script>
+    <style type="text/css">
+        body {
+            width: 100%;
+        }
+
+        #gallery-container {
+            max-width: 100%;
+            padding-left: 50px;
+            padding-right: 50px;
+            margin: auto;
+            overflow-x: hidden;
+        }
+        .images-row {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .image-container {
+            height: 200px;
+            overflow: hidden;
+            display: inline-block;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gallery-container"></div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+.idea
+*.ipr
+*.iml
+*.iws
+*.dll
+*.ids
+*.a
+*.log
+build
+target
+dist
+test-output
+out
+bin
+obj

@@ -4,44 +4,63 @@
     <title>Horizontal gallery</title>
     <script type="text/javascript" src="./js/jquery-1.8.0.min.js"></script>
     <script type="text/javascript">
-        function alignRowImages(gElements, containerWidth, imagesWidth, margin) {
-            var alpha = 1.0 * (containerWidth - margin) / imagesWidth;
-            console.log(containerWidth, imagesWidth, margin, imagesWidth * alpha + margin)
-            gElements.forEach(function (el) {
-                el.$imgContainer.width(Math.floor(el.$imgContainer.width() * alpha));
-                el.$img.css("margin-left", "-=" + Math.floor(el.$imgContainer.width() * (1 - alpha) / 2));
-            })
-        }
 
-        function createNewImagesRow($gContainer) {
-            var $row = $("<div class='images-row'></div>").appendTo($gContainer);
-            return $row.css("width", $gContainer.width() + "px");
-        }
 
         function createGallery(images) {
+
+            function setRowWidth(row, width) {
+                row.$row.width(width);
+                row.width = width;
+                return row
+            }
+
+            function alignRow(row) {
+                setRowWidth(row, row.$gContainer.width());
+                var alpha = 1.0 * (row.width - row.margin) / row.imagesWidth;
+                row.images.forEach(function (el) {
+                    el.$imgContainer.width(Math.floor(el.$img.width() * alpha));
+                    el.$img.css("margin-left", -Math.floor(el.$imgContainer.width() * (1.0 - alpha) / 2));
+                })
+            }
+
+            function createRow($gContainer) {
+                var $row = $("<div class='images-row'></div>").appendTo($gContainer);
+                var row = {$row: $row, $gContainer: $gContainer, images: []};
+                setRowWidth(row, $gContainer.width());
+                rows.push(row);
+                return row;
+            }
+
             var     rowHeight = 200,
                     $gContainer = $("#gallery-container").empty(),
                     containerMargin = 5,
-                    contentWidth = 0,
-                    gElements = [],
-                    $row = createNewImagesRow($gContainer),
-                    rowWidth = $row.width();
+                    currentContentWidth = 0,
+                    rows = [],
+                    currentRow = createRow($gContainer);
 
             images.forEach(function (image) {
                 $('<img src="' + image.uri + '" alt="" height="' + rowHeight + 'px">').load(function () {
                     var $img = $(this);
                     var $imgContainer = $("<div class='image-container'></div>");
-                    $row.append($imgContainer.append($img));
-                    var imgWidth = $img.width()
-                    gElements.push({$row: $row, $imgContainer: $imgContainer, $img: $img, imgWidth: imgWidth});
-                    contentWidth += imgWidth + containerMargin;
-                    if (contentWidth > rowWidth) {
-                        var margin = containerMargin * gElements.length
-                        alignRowImages(gElements, $row.width(), contentWidth - margin, margin);
-                        $row = createNewImagesRow($gContainer);
-                        rowWidth = $row.width()
-                        contentWidth = 0;
-                        gElements = [];
+                    currentRow.$row.append($imgContainer.append($img));
+                    var imgWidth = $img.width();
+                    currentRow.images.push({row: currentRow, $imgContainer: $imgContainer, $img: $img, imgWidth: imgWidth});
+                    currentContentWidth += imgWidth + containerMargin;
+                    if (currentContentWidth > currentRow.width) {
+
+                        var margin = containerMargin * currentRow.images.length;
+                        currentRow.imagesWidth = currentContentWidth - margin;
+                        currentRow.margin = margin;
+                        alignRow(currentRow);
+
+                        if (rows.length > 1 && currentRow.width < rows[rows.length - 2].width) {
+                            rows.forEach(function(row) {
+                                alignRow(row)
+                            })
+                        }
+
+                        currentRow = createRow($gContainer);
+                        currentContentWidth = 0;
                     }
                 })
             });
@@ -61,15 +80,13 @@
         })
     </script>
     <style type="text/css">
-        body {
-            width: 100%;
+        #gallery-wrapper {
+            padding-left: 40px;
+            padding-right: 40px;
         }
 
         #gallery-container {
             max-width: 100%;
-            padding-left: 50px;
-            padding-right: 50px;
-            margin: auto;
             overflow-x: hidden;
         }
         .images-row {
@@ -85,6 +102,8 @@
     </style>
 </head>
 <body>
-    <div id="gallery-container"></div>
+    <div id="gallery-wrapper">
+        <div id="gallery-container"></div>
+    </div>
 </body>
 </html>

@@ -15,7 +15,7 @@ class @HGallery extends EventDispatcher
     @gRows = []
     @gImages.forEach (gImage) => @pushGImage gImage
     lastGRows.forEach (gRow) => gRow.remove()
-    @gSelected.$img.click()
+    @gSelected.$img.click() if @gSelected
     @
 
   createGRow: ->
@@ -27,15 +27,14 @@ class @HGallery extends EventDispatcher
     gImage = new GImage $img, data
     $img.click =>
       @gSelected = gImage
-      @trigger "gImageSelected", [gImage]
+      @trigger "gImageSelected", [gImage, data]
       $(".full-view-container").remove()
-      gImage.gRow.$row.before(
-        """
-        <div class='full-view-container'>
-          <img class='full-view-image' src='#{gImage.src}'>
+      $("""
+        <div class="full-view-container">
+          <img class="full-view-image" src="#{gImage.src}">
         </div>
         """
-      )[0].scrollIntoView()
+      ).insertBefore(gImage.gRow.$row)[0].scrollIntoView()
     @gImages.push gImage
     gImage
 

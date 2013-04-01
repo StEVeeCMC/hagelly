@@ -39,7 +39,9 @@
       lastGRows.forEach(function(gRow) {
         return gRow.remove();
       });
-      this.gSelected.$img.click();
+      if (this.gSelected) {
+        this.gSelected.$img.click();
+      }
       return this;
     };
 
@@ -56,9 +58,9 @@
       gImage = new GImage($img, data);
       $img.click(function() {
         _this.gSelected = gImage;
-        _this.trigger("gImageSelected", [gImage]);
+        _this.trigger("gImageSelected", [gImage, data]);
         $(".full-view-container").remove();
-        return gImage.gRow.$row.before("<div class='full-view-container'>\n  <img class='full-view-image' src='" + gImage.src + "'>\n</div>")[0].scrollIntoView();
+        return $("<div class=\"full-view-container\">\n  <img class=\"full-view-image\" src=\"" + gImage.src + "\">\n</div>").insertBefore(gImage.gRow.$row)[0].scrollIntoView();
       });
       this.gImages.push(gImage);
       return gImage;

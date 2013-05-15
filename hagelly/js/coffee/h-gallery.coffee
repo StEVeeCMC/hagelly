@@ -1,7 +1,7 @@
 class @HGallery extends EventDispatcher
-  constructor: (@images, @rowHeight, @containerMargin) ->
+  constructor: (@containerId, @images, @rowHeight, @containerMargin) ->
     super()
-    @$gContainer = $("#gallery-container").empty()
+    @$gContainer = $("##{@containerId}").empty()
     @gImages = []
     @gRows = []
     @images.forEach (image) =>
